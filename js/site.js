@@ -41,8 +41,8 @@ class GalleryGrid {
 				if (this.ids.length > pos)
 					imgContainer = $(
 						`<div class="medium-${size.col} columns gallery-image-container">
-							<a href="/OA/img/${this.ids[pos]}.png" data-lightbox="gallery-set">
-								<img class="gallery-image" src="/OA/img/${this.ids[pos]}.png">
+							<a href="img/${this.ids[pos]}.png" data-lightbox="gallery-set">
+								<img class="gallery-image" src="img/${this.ids[pos]}.png">
 							</a>
 						</div>`);
 
@@ -74,7 +74,7 @@ class GalleryGrid {
 		for(let holder = $(`.gallery-image`), i = 0; i < this.ids.length; i++) {
 			let img = this.ids[((page-1) * gridSize) + i];
 
-			$(holder[i]).empty().attr("src", `/OA/img/${img}.png`).css("visibility", (img == "&nbsp;") ? "hidden" : "visible");
+			$(holder[i]).empty().attr("src", `img/${img}.png`).css("visibility", (img == "&nbsp;") ? "hidden" : "visible");
 
 		}
 
