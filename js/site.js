@@ -41,7 +41,7 @@ class GalleryGrid {
 				if (this.ids.length > pos)
 					imgContainer = $(
 						`<div class="medium-${size.col} columns gallery-image-container">
-							<a href="img/${this.ids[pos]}.png" data-lightbox="gallery-set">
+							<a href="img/${this.ids[pos]}.png" class="gallery-image-link" data-lightbox="gallery-set">
 								<img class="gallery-image" src="img/${this.ids[pos]}.png">
 							</a>
 						</div>`);
@@ -69,16 +69,28 @@ class GalleryGrid {
 		if (page < 1 || (page * gridSize) - gridSize > this.ids.length)
 			page = 1;
 
-		$(`.gallery-page-header`).empty().append(`<div class="gallery-page-header">Page ${page} of ${this.pages}</div>`);
+		$(`.gallery-page-header`).text(`Page ${page} of ${this.pages}`);
 
-		for(let holder = $(`.gallery-image`), i = 0; i < this.ids.length; i++) {
+		for(let i = 0; i < gridSize; i++) {
 			let img = this.ids[((page-1) * gridSize) + i];
 
-			$(holder[i]).empty().attr("src", `img/${img}.png`).css("visibility", (img == "&nbsp;") ? "hidden" : "visible");
-
+			if (img != null) {
+				$($(`.gallery-image-link`)[i]).attr("href", `img/${img}.png`).attr("data-lightbox", "gallery-image");
+				$($(`.gallery-image`)[i]).attr("src", `img/${img}.png`).css("visibility", "visible");
+			} else {
+				$($(`.gallery-image-link`)[i]).attr("href", "#").attr("data-lightbox", "null");
+				$($(`.gallery-image`)[i]).attr("src", `img/${img}.png`).css("visibility", "hidden");
+			}
 		}
 
 		return this;
 	}
 
+}
+
+// String formatting prototype extension (not implemented yet)
+if (!String.prototype.format) {
+	String.prototype.format = function() {
+		return this.replace(/{(\d+)}/g, (m, n) => typeof arguments[n] != 'undefined' ? arguments[n] : m);
+	};
 }
