@@ -46,7 +46,7 @@ class GalleryGrid {
                 // Insert into grid only if the position is valid
                 if (this.ids.length > pos)
                     imgContainer = $(
-                        `<div class="medium-${size.col} columns gallery-image-container">
+                        `<div class="medium-${size.col} small-${size.col} columns gallery-image-container">
                             <a href="img/${this.ids[pos]}.png" class="gallery-image-link" data-lightbox="gallery-set">
                                 <img class="gallery-image" src="img/${this.ids[pos]}.png">
                             </a>
