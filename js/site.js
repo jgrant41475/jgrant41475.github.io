@@ -15,7 +15,7 @@ class GalleryGrid {
     // Defines grid size, defaults to 3x3
     setGrid(gridX, gridY) {
     	// Grid can only be 1-4 columns wide
-    	this.size = (gridX > 0 && gridX < 5 && gridY > 0) 
+    	this.size = (gridX > 0 && gridX < 5 && gridY > 0)
     		? { x: gridX, y: gridY, col: 12/gridX } : { x: 3, y: 3, col: 4 };
 
     	// Number of pages needed
@@ -26,9 +26,10 @@ class GalleryGrid {
 
     // create gallery
     make() {
+    	if (this.pages > 1)
+    		this.grid.append(`<div class="gallery-page-header">Page 1 of ${this.pages}</div>`);
     	// Add gallery page header and main container
-        this.grid.append(`<div class="gallery-page-header">Page 1 of ${this.pages}</div>`)
-                 .append('<div class="gallery-container"></div>');
+        this.grid.append('<div class="gallery-container"></div>');
 
         // store container for later, define local copy of size
         let container = $('.gallery-container'),
@@ -46,7 +47,7 @@ class GalleryGrid {
                 // Insert into grid only if the position is valid
                 if (this.ids.length > pos)
                     imgContainer = $(
-                        `<div class="medium-${size.col} small-${size.col} columns gallery-image-container">
+                        `<div class="medium-${size.col} columns gallery-image-container">
                             <a href="img/${this.ids[pos]}.png" class="gallery-image-link" data-lightbox="gallery-set">
                                 <img class="gallery-image" src="img/${this.ids[pos]}.png">
                             </a>
@@ -58,12 +59,12 @@ class GalleryGrid {
             container.append(rowDiv);
         });
 
-        // Add page footer
-        this.grid.append(`<div class="gallery-page-footer"></div>`);
+        if (this.pages > 1) // Add page footer
+	        this.grid.append(`<div class="gallery-page-footer"></div>`);
 
-        Array.from(Array(this.pages), (a,b) => b+1).forEach(pageLink => {            
-            $(`.gallery-page-footer`).append(`<a href="#" class="gallery-page-footer-link" onclick="GalleryGrid.update(${pageLink})">${pageLink}</a>`);
-        })
+        Array.from(Array(this.pages), (a,b) => b+1).forEach(pageLink => {
+            $(`.gallery-page-footer`).append(`<a href="javascript:void(0);" class="gallery-page-footer-link" onclick="GalleryGrid.update(${pageLink})">${pageLink}</a>`);
+        });
         
         return this;
     }
@@ -83,7 +84,7 @@ class GalleryGrid {
         for(let i = 0; i < gridSize; i++) {
             let img = this.ids[((page-1) * gridSize) + i];
 
-            if (img != null) {
+            if (img != null && img != "null") {
             	// Display img
                 $($(`.gallery-image-link`)[i]).attr("href", `img/${img}.png`).attr("data-lightbox", "gallery-image");
                 $($(`.gallery-image`)[i]).attr("src", `img/${img}.png`).css("visibility", "visible");
