@@ -44,14 +44,22 @@ class GalleryGrid {
             	// Current position in grid
                 let pos = (row*size.x) + col, imgContainer;
 
-                // Insert into grid only if the position is valid
+                // Insert into grid
                 if (this.ids.length > pos)
-                    imgContainer = $(
+                    imgContainer = $( (this.ids[pos] != null) ?
                         `<div class="medium-${size.col} columns gallery-image-container">
                             <a href="img/${this.ids[pos]}.png" class="gallery-image-link" data-lightbox="gallery-set">
                                 <img class="gallery-image" src="img/${this.ids[pos]}.png">
                             </a>
-                        </div>`);
+                        </div>` :
+
+                        `<div class="medium-${size.col} columns gallery-image-container">
+                            <a href="javascript:void(0);" class="gallery-image-link" data-lightbox="null">
+                                <img class="gallery-image" src="">
+                            </a>
+                        </div>`
+
+                        );
 
                 rowDiv.append(imgContainer);
             });
@@ -84,14 +92,14 @@ class GalleryGrid {
         for(let i = 0; i < gridSize; i++) {
             let img = this.ids[((page-1) * gridSize) + i];
 
-            if (img != null && img != "null") {
+            if (img != null) {
             	// Display img
                 $($(`.gallery-image-link`)[i]).attr("href", `img/${img}.png`).attr("data-lightbox", "gallery-image");
                 $($(`.gallery-image`)[i]).attr("src", `img/${img}.png`).css("visibility", "visible");
             } else {
             	// Hide img and replace data-lightbox attribute with null so lightbox doesn't show it in slideshow group
-                $($(`.gallery-image-link`)[i]).attr("href", "#").attr("data-lightbox", "null");
-                $($(`.gallery-image`)[i]).attr("src", `img/${img}.png`).css("visibility", "hidden");
+                $($(`.gallery-image-link`)[i]).attr("href", "javascript:void(0);").attr("data-lightbox", "null");
+                $($(`.gallery-image`)[i]).attr("src", ``).css("visibility", "hidden");
             }
         }
 
