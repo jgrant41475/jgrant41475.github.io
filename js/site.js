@@ -1,109 +1,99 @@
 class GalleryGrid {
 
     constructor() {
-        if ($('.gallery').length != 1)
-            throw new Error("There can only be one gallery per page.");
+    	this.gallery = $('.gallery');
 
-        // Create safe list of ids and define default grid size as 3x3
-        this.ids = [...arguments].map(id => (typeof(id) == "number") ? id : null);
+        if (this.gallery.length != 1)
+            throw new Error('There can only be one gallery per page.');
+
+        // Create safe list of ids and set default grid size
+        this.ids = [...arguments].map(id => typeof(id) == 'number' ? id : null);
         this.setGrid();
-
-        // remove any children inside grid
-        this.grid = $('.gallery').empty();
     }
 
-    // Defines grid size, defaults to 3x3
+    // Defines grid size, can only be 1-4 columns wide, defaults to 3x3
     setGrid(gridX, gridY) {
-    	// Grid can only be 1-4 columns wide
-    	this.size = (gridX > 0 && gridX < 5 && gridY > 0)
-    		? { x: gridX, y: gridY, col: 12/gridX } : { x: 3, y: 3, col: 4 };
+    	this.size = gridX > 0 && gridX < 5 && gridY > 0
+    					? { x: gridX, y: gridY, col: 12/gridX }
+    					: { x: 3, y: 3, col: 4 };
 
-    	// Number of pages needed
-        this.pages = Math.ceil(this.ids.length / (this.size.x * this.size.y));
+        this.gridSize = this.size.x * this.size.y;
+        this.pages = Math.ceil(this.ids.length / this.gridSize);
 
         return this;
     }
 
-    // create gallery
+    // insert gallery container
     make() {
+    	// Add page header if there is more than one page
     	if (this.pages > 1)
-    		this.grid.append(`<div class="gallery-page-header">Page 1 of ${this.pages}</div>`);
-    	// Add gallery page header and main container
-        this.grid.append('<div class="gallery-container"></div>');
+    		this.gallery.append(`<div class="gallery-page-header">Page 1 of ${this.pages}</div>`);
 
-        // store container for later, define local copy of size
-        let container = $('.gallery-container'),
-            size = this.size;
+    	// Add gallery
+        this.gallery.append(this._getGallery(this.size));
 
-        // Iterate rows
-        Array.from(Array(size.y), (a,b) => b).forEach(row => {
-            let rowDiv = $(`<div class="row"></div>`);
-
-            // Iterate columns
-            Array.from(Array(size.x), (a,b) => b).forEach(col => {
-            	// Current position in grid
-                let pos = (row*size.x) + col, imgContainer;
-
-                // Insert into grid
-                if (this.ids.length > pos)
-                    imgContainer = $( (this.ids[pos] != null) ?
-                        `<div class="medium-${size.col} columns gallery-image-container">
-                            <a href="img/${this.ids[pos]}.png" class="gallery-image-link" data-lightbox="gallery-set">
-                                <img class="gallery-image" src="img/${this.ids[pos]}.png">
-                            </a>
-                        </div>` :
-
-                        `<div class="medium-${size.col} columns gallery-image-container">
-                            <a href="javascript:void(0);" class="gallery-image-link" data-lightbox="null">
-                                <img class="gallery-image" src="">
-                            </a>
-                        </div>`
-
-                        );
-
-                rowDiv.append(imgContainer);
-            });
-
-            container.append(rowDiv);
-        });
-
-        if (this.pages > 1) // Add page footer
-	        this.grid.append(`<div class="gallery-page-footer"></div>`);
-
-        Array.from(Array(this.pages), (a,b) => b+1).forEach(pageLink => {
-            $(`.gallery-page-footer`).append(`<a href="javascript:void(0);" class="gallery-page-footer-link" onclick="GalleryGrid.update(${pageLink})">${pageLink}</a>`);
-        });
-        
+        // Add page footer if more than one page
+        if (this.pages > 1)
+	        this.gallery.append(
+	        	`<div class="gallery-page-footer">${red(iterLinks(this.pages, pageLink => 
+		        		`<a href="javascript:void(0);" class="gallery-page-footer-link" onclick="GalleryGrid.update(${pageLink})">${pageLink}</a>`))}
+	        	</div>`);
+   
         return this;
     }
 
     // Handles paging
     update(page) {
-        let gridSize = this.size.x * this.size.y;
-
         // If page is invalid, default to 1
-        if (page < 1 || (page * gridSize) - gridSize > this.ids.length)
+        if (page < 1 || page > this.pages)
             page = 1;
 
         // Update page header
-        $(`.gallery-page-header`).text(`Page ${page} of ${this.pages}`);
+        $('.gallery-page-header').text(`Page ${page} of ${this.pages}`);
 
-        // Update images in gallery, if null make image container invisible
-        for(let i = 0; i < gridSize; i++) {
-            let img = this.ids[((page-1) * gridSize) + i];
+        // Update gallery images
+        iter(this.gridSize).forEach(i => {
+        	let img = this.ids[( (page-1) * this.gridSize) + i];
 
-            if (img != null) {
+        	if (img != null) {
             	// Display img
-                $($(`.gallery-image-link`)[i]).attr("href", `img/${img}.png`).attr("data-lightbox", "gallery-image");
-                $($(`.gallery-image`)[i]).attr("src", `img/${img}.png`).css("visibility", "visible");
+                $($(`.gallery-image-link`)[i])
+                	.attr({'href': `img/${img}.png`, 'data-lightbox': 'gallery-image', 'style': 'visibility: visible'})
+                	.removeClass("hide-for-small");
+                $($(`.gallery-image`)[i]).attr('src', `img/${img}.png`).css('visibility', 'visible');
             } else {
-            	// Hide img and replace data-lightbox attribute with null so lightbox doesn't show it in slideshow group
-                $($(`.gallery-image-link`)[i]).attr("href", "javascript:void(0);").attr("data-lightbox", "null");
-                $($(`.gallery-image`)[i]).attr("src", ``).css("visibility", "hidden");
+            	// Hide img and replace data-lightbox attribute with null so lightbox doesn't list it in slideshow group
+            	$($('.gallery-image-link')[i])
+            		.attr({'href': 'javascript:void(0);', 'data-lightbox': 'null', 'style': 'visibility: hidden'})
+            		.addClass('hide-for-small');
+                $($('.gallery-image')[i]).attr('src', '').css('visibility', 'hidden');
             }
-        }
-
-        return this;
+        });
     }
 
+    _getGallery(size) {
+        return `<div class="gallery-container">${red(iterMap(size.y, row => {
+			return `<div class="row">${red(iterMap(size.x, col => {
+				// Current position in grid
+                let pos = (row*size.x) + col;
+
+                return `<div class="medium-${size.col} columns gallery-image-container">${ this.ids[pos] != null ?
+                			// Display image
+                			`<a href="img/${this.ids[pos]}.png" class="gallery-image-link" data-lightbox="gallery-set">
+								<img class="gallery-image" src="img/${this.ids[pos]}.png">
+                        	</a>` :
+                        	// Hide image if null
+                        	`<a href="javascript:void(0);" style="visibility: hidden;" class="gallery-image-link hide-for-small" data-lightbox="null">
+                            	<img class="gallery-image" src="" style="visibility: hidden;">
+                        	</a>`
+                		}</div>`;
+      		}))}</div>`;
+    	}))}</div>`;
+    }
 }
+
+// Helper functions
+function iter(n) { return Array.from(Array(n), (a,b) => b); }
+function iterMap(n, callBack) { return iter(n).map(it => callBack(it)); }
+function iterLinks(n, callBack) { return Array.from(Array(n), (a,b) => b + 1).map(it => callBack(it)); }
+function red(arr) {	return arr.reduce((a,b) => String(a) + String(b)) }
