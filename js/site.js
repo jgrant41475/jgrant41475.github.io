@@ -78,15 +78,15 @@ class GalleryGrid {
 				let pos = (row*size.x) + col;
 
 				return `<div class="medium-${size.col} columns gallery-image-container">${ this.ids[pos] != null ?
-							// Display image
-							`<a href="img/${this.ids[pos].id}.png" class="gallery-image-link" data-title="${this.ids[pos].caption}" data-lightbox="gallery-set">
-								<img class="gallery-image" src="img/${this.ids[pos].id}.png">
-							</a>` :
-							// Hide image if null
-							`<a href="javascript:void(0);" style="visibility: hidden;" class="gallery-image-link hide-for-small" data-lightbox="null">
-								<img class="gallery-image" src="" style="visibility: hidden;">
-							</a>`
-						}</div>`;
+						// Display image
+						`<a href="img/${this.ids[pos].id}.png" class="gallery-image-link" data-title="${this.ids[pos].caption}" data-lightbox="gallery-set">
+							<img class="gallery-image" src="img/${this.ids[pos].id}.png">
+						</a>` :
+						// Hide image if null
+						`<a href="javascript:void(0);" style="visibility: hidden;" class="gallery-image-link hide-for-small" data-lightbox="null">
+							<img class="gallery-image" src="" style="visibility: hidden;">
+						</a>`
+				}</div>`;
 	  		}))}</div>`;
 		}))}</div>`;
 	}
