@@ -7,17 +7,17 @@ class GalleryGrid {
             throw new Error('There can only be one gallery per page.');
 
         // Create safe list of ids and set default grid size
-        this.ids = [...arguments].map(id => typeof(id) == 'number' ? id : null);
+        this.ids = [...arguments].map(id => id != null ? this._map(id) : null);
         this.setGrid();
     }
 
     // Defines grid size, can only be 1-4 columns wide, defaults to 3x3
     setGrid(gridX, gridY) {
-    	this.size = gridX > 0 && gridX < 5 && gridY > 0
-    					? { x: gridX, y: gridY, col: 12/gridX }
-    					: { x: 3, y: 3, col: 4 };
+    	let x = gridX > 0 && gridX < 5 ? gridX : 3,
+    		y = gridY > 0 && gridY < 25 ? gridY : 3;
 
-        this.gridSize = this.size.x * this.size.y;
+    	this.size = { 'x': x, 'y': y, 'col': 12/x };
+        this.gridSize = x * y
         this.pages = Math.ceil(this.ids.length / this.gridSize);
 
         return this;
@@ -58,13 +58,13 @@ class GalleryGrid {
         	if (img != null) {
             	// Display img
                 $($(`.gallery-image-link`)[i])
-                	.attr({'href': `img/${img}.png`, 'data-lightbox': 'gallery-image', 'style': 'visibility: visible'})
+                	.attr({'href': `img/${img.id}.png`, 'data-lightbox': 'gallery-image', 'data-title': img.caption, 'style': 'visibility: visible'})
                 	.removeClass("hide-for-small");
-                $($(`.gallery-image`)[i]).attr('src', `img/${img}.png`).css('visibility', 'visible');
+                $($(`.gallery-image`)[i]).attr('src', `img/${img.id}.png`).css('visibility', 'visible');
             } else {
             	// Hide img and replace data-lightbox attribute with null so lightbox doesn't list it in slideshow group
             	$($('.gallery-image-link')[i])
-            		.attr({'href': 'javascript:void(0);', 'data-lightbox': 'null', 'style': 'visibility: hidden'})
+            		.attr({'href': 'javascript:void(0);', 'data-lightbox': 'null', 'data-title': 'null', 'style': 'visibility: hidden'})
             		.addClass('hide-for-small');
                 $($('.gallery-image')[i]).attr('src', '').css('visibility', 'hidden');
             }
@@ -79,8 +79,8 @@ class GalleryGrid {
 
                 return `<div class="medium-${size.col} columns gallery-image-container">${ this.ids[pos] != null ?
                 			// Display image
-                			`<a href="img/${this.ids[pos]}.png" class="gallery-image-link" data-lightbox="gallery-set">
-								<img class="gallery-image" src="img/${this.ids[pos]}.png">
+                			`<a href="img/${this.ids[pos].id}.png" class="gallery-image-link" data-title="${this.ids[pos].caption}" data-lightbox="gallery-set">
+								<img class="gallery-image" src="img/${this.ids[pos].id}.png">
                         	</a>` :
                         	// Hide image if null
                         	`<a href="javascript:void(0);" style="visibility: hidden;" class="gallery-image-link hide-for-small" data-lightbox="null">
@@ -90,10 +90,18 @@ class GalleryGrid {
       		}))}</div>`;
     	}))}</div>`;
     }
+
+    _map(id) {
+    	if (typeof(id) == 'number') {
+    		return {'id': id, 'caption': ''};
+    	} else if (typeof(id) == "object" && typeof(id.id) == 'number' && typeof(id.caption) == 'string')
+    		return {'id': id.id, 'caption': id.caption};
+    	else return null;
+    }
 }
 
 // Helper functions
 function iter(n) { return Array.from(Array(n), (a,b) => b); }
 function iterMap(n, callBack) { return iter(n).map(it => callBack(it)); }
 function iterLinks(n, callBack) { return Array.from(Array(n), (a,b) => b + 1).map(it => callBack(it)); }
-function red(arr) {	return arr.reduce((a,b) => String(a) + String(b)) }
+function red(arr) { return arr.reduce((a,b) => String(a) + String(b)) }
